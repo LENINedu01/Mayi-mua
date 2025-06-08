@@ -1,0 +1,175 @@
+:root {
+  --azul: #4a90e2;
+  --blanco: #ffffff;
+  --beige: #f5f5dc;
+  --rosa: #ffd6e8;
+  --rosa-intenso: #ffb6c1;
+  --rojo: #ff4d4d;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, var(--rosa), var(--beige));
+  overflow: auto;
+  color: #333;
+}
+
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+}
+
+.login-container {
+  background-color: var(--blanco);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1;
+}
+
+input[type="password"] {
+  padding: 10px;
+  width: 80%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 25px;
+  background-color: var(--azul);
+  color: var(--blanco);
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--rosa-intenso);
+}
+
+.error {
+  color: var(--rojo);
+  margin-top: 10px;
+}
+
+/* 🌟 Estrellitas mágicas */
+.star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: twinkle 2s infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+.menu-page {
+  background: linear-gradient(to top left, var(--rosa), var(--beige));
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu-container {
+  background: var(--blanco);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.menu-container h1 {
+  color: var(--azul);
+}
+
+.menu-container button {
+  margin: 10px;
+  padding: 15px 30px;
+  font-size: 16px;
+  background-color: var(--rosa-intenso);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+.menu-container button:hover {
+  background-color: var(--azul);
+}
+/* Corazones voladores 💘 */
+.heart {
+  position: fixed;
+  top: 100%;
+  animation: floatHeart 2s ease-out forwards;
+  pointer-events: none;
+  z-index: 9999;
+  color: #ff4d88;
+}
+
+@keyframes floatHeart {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1.5);
+    opacity: 0;
+  }
+}
+/* Collage */
+.collage-page {
+  background: linear-gradient(to bottom, #ffe6f0, #f0f8ff);
+  color: #333;
+  font-family: 'Arial', sans-serif;
+  padding: 2rem;
+}
+
+header h1 {
+  text-align: center;
+  color: #cc3366;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.collage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.photo-card {
+  background-color: #ffffffcc;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  padding: 1rem;
+  max-width: 300px;
+  text-align: center;
+}
+
+.photo-card img {
+  width: 100%;
+  border-radius: 15px;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.photo-card p {
+  font-size: 0.95rem;
+  color: #555;
+}
