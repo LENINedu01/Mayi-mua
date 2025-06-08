@@ -1,7 +1,7 @@
 function checkPassword() {
   const passwordInput = document.getElementById("password").value;
   const errorMsg = document.getElementById("error-msg");
-  const correctPassword = "tucontraseña"; // reemplaza con tu clave real
+  const correctPassword = "02.06.25"; // reemplaza con tu clave real
 
   if (passwordInput === correctPassword) {
     errorMsg.textContent = "";
