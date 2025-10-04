@@ -167,7 +167,7 @@ function draw() {
     score += 5;
     star = null;
     clearInterval(game);
-    alert("🌟 ¡Ganaste 1 estrella!");
+    alert("🌟 ¡Ganaste 1 estrella toma captura para reclamar!");
     endGame();
     return;
   } else {
