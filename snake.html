@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐍 Snake Love 💖</title>
+  <link rel="stylesheet" href="snake.css">
+</head>
+<body class="snake-page">
+  <header>
+    <h1>🐍 Snake Love 💘</h1>
+    <p>Come corazones y crece con amor</p>
+  </header>
+
+  <main class="game-wrapper">
+    <div class="game-box">
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
+      <div class="scoreboard">
+        ❤️ Puntos: <span id="score">0</span>
+      </div>
+      <!-- Caja para el mensaje de “Fin del juego” -->
+      <div id="gameOverBox" class="hidden">
+        <p id="gameOverText">💔 Fin del juego... ¡Tu amor creció 0 veces!</p>
+        <button id="retryBtn">🔁 Volver a intentar</button>
+      </div>
+    </div>
+    <button class="back-btn" onclick="location.href='jueguitos.html'">⬅️ Volver al menú</button>
+  </main>
+
+  <script src="snake.js"></script>
+</body>
+</html>
