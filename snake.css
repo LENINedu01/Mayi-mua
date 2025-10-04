@@ -1,0 +1,106 @@
+.snake-page {
+  background: linear-gradient(to bottom right, #ffe6f0, #f0f8ff);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+header {
+  margin-top: 20px;
+  color: #cc3366;
+}
+
+.game-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin-top: 20px;
+}
+
+.game-box {
+  background-color: #fff;
+  border: 6px solid #cc3366;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  border-radius: 10px;
+  background-color: #fff;
+  width: 90vw;
+  max-width: 400px;
+  height: auto;
+
+  display: block;
+  margin: 0 auto;
+  border: 5px solid #8b1a3a; /* 🍷 Borde color vino */
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(139, 26, 58, 0.5);
+
+
+}
+
+.scoreboard {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.back-btn {
+  margin-top: 25px;
+  padding: 10px 20px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #cc3366;
+}
+.hidden {
+  display: none;
+}
+
+#gameOverBox {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #ffe6f0;
+  border: 2px solid #cc3366;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  color: #cc3366;
+  font-size: 1rem;
+  text-align: center;
+}
+
+#retryBtn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #cc3366;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#retryBtn:hover {
+  background-color: #4a90e2;
+}
