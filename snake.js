@@ -24,8 +24,20 @@ function initGame() {
 }
 
 document.addEventListener("keydown", directionHandler);
+// 🚫 Evitar que las flechas muevan la página
+window.addEventListener("keydown", function(e) {
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+    e.preventDefault();
+  }
+});
+
 canvas.addEventListener("touchstart", handleTouchStart, false);
 canvas.addEventListener("touchmove", handleTouchMove, false);
+// 🚫 Evita que el deslizamiento táctil mueva la página
+canvas.addEventListener("touchmove", function(e) {
+  e.preventDefault();
+}, { passive: false });
+
 retryBtn.addEventListener("click", initGame);
 
 let xDown = null;
