@@ -104,3 +104,8 @@ canvas {
 #retryBtn:hover {
   background-color: #4a90e2;
 }
+body {
+  overflow: hidden;
+  touch-action: none;
+}
+
