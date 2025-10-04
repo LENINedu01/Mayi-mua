@@ -15,7 +15,10 @@ function initGame() {
   direction = "RIGHT";
   score = 0;
   gotStar = false;
-  heart = randomPosition();
+  heart = {
+    x: Math.floor(Math.random() * boxes) * box,
+    y: Math.floor(Math.random() * boxes) * box
+  };
   star = null;
   document.getElementById("score").innerText = score;
   gameOverBox.classList.add("hidden");
@@ -23,32 +26,23 @@ function initGame() {
   requestAnimationFrame(gameLoop);
 }
 
+// 🧭 Dirección por teclado
 document.addEventListener("keydown", directionHandler);
+
 // 🚫 Evitar que las flechas muevan la página
-window.addEventListener("keydown", function(e) {
+window.addEventListener("keydown", e => {
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
     e.preventDefault();
   }
 });
 
-canvas.addEventListener("touchstart", handleTouchStart, false);
-canvas.addEventListener("touchmove", handleTouchMove, false);
-// 🚫 Evita que el deslizamiento táctil mueva la página
-canvas.addEventListener("touchmove", function(e) {
-  e.preventDefault();
-}, { passive: false });
-
-retryBtn.addEventListener("click", initGame);
-
 let xDown = null;
 let yDown = null;
 
-function randomPosition() {
-  return {
-    x: Math.floor(Math.random() * boxes) * box,
-    y: Math.floor(Math.random() * boxes) * box
-  };
-}
+// 🖐️ Controles táctiles
+canvas.addEventListener("touchstart", handleTouchStart, false);
+canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+retryBtn.addEventListener("click", initGame);
 
 function directionHandler(e) {
   if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
@@ -64,12 +58,13 @@ function handleTouchStart(evt) {
 }
 
 function handleTouchMove(evt) {
+  evt.preventDefault();
   if (!xDown || !yDown) return;
 
-  let xUp = evt.touches[0].clientX;
-  let yUp = evt.touches[0].clientY;
-  let xDiff = xDown - xUp;
-  let yDiff = yDown - yUp;
+  const xUp = evt.touches[0].clientX;
+  const yUp = evt.touches[0].clientY;
+  const xDiff = xDown - xUp;
+  const yDiff = yDown - yUp;
 
   if (Math.abs(xDiff) > Math.abs(yDiff)) {
     if (xDiff > 0 && direction !== "RIGHT") direction = "LEFT";
@@ -99,6 +94,7 @@ function drawStar(x, y) {
   ctx.fillText("⭐", x + box / 2, y + box / 2);
 }
 
+// 🕹️ Dibuja todo
 function draw() {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -108,13 +104,13 @@ function draw() {
   ctx.lineWidth = 4;
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-  // 🐍 Dibuja la serpiente
+  // 🐍 Serpiente
   for (let i = 0; i < snake.length; i++) {
     const x = snake[i].x;
     const y = snake[i].y;
 
     if (i === 0) {
-      // Cabeza en forma de lanza
+      // Cabeza con forma de lanza
       ctx.fillStyle = "#ff4d88";
       ctx.beginPath();
       if (direction === "RIGHT") {
@@ -151,7 +147,7 @@ function draw() {
         ctx.fill();
       }
     } else {
-      // Cuerpo redondeado
+      // Cuerpo
       const grad = ctx.createRadialGradient(x + box / 2, y + box / 2, 5, x + box / 2, y + box / 2, box / 1.2);
       grad.addColorStop(0, "#ffd6e8");
       grad.addColorStop(1, "#ffb6c1");
@@ -162,13 +158,14 @@ function draw() {
     }
   }
 
-  // ❤️ Corazón
   drawHeart(heart.x, heart.y);
-
-  // 🌟 Si hay estrella, dibujarla
   if (star) drawStar(star.x, star.y);
 
-  // Movimiento
+  moveSnake();
+}
+
+// 🧠 Movimiento y lógica
+function moveSnake() {
   let headX = snake[0].x;
   let headY = snake[0].y;
 
@@ -177,18 +174,22 @@ function draw() {
   if (direction === "RIGHT") headX += box;
   if (direction === "DOWN") headY += box;
 
-  // 💖 Comer corazón
   if (headX === heart.x && headY === heart.y) {
     score++;
     document.getElementById("score").innerText = score;
-    heart = randomPosition();
+    heart = {
+      x: Math.floor(Math.random() * boxes) * box,
+      y: Math.floor(Math.random() * boxes) * box
+    };
 
-    // 🌟 Si llega a 20 puntos, aparece la estrella
+    // 🌟 Aparece estrella al llegar a 20 corazones
     if (score === 20 && !star) {
-      star = randomPosition();
+      star = {
+        x: Math.floor(Math.random() * boxes) * box,
+        y: Math.floor(Math.random() * boxes) * box
+      };
     }
   } else if (star && headX === star.x && headY === star.y) {
-    // 🌟 Comer estrella
     gotStar = true;
     star = null;
   } else {
@@ -197,7 +198,6 @@ function draw() {
 
   const newHead = { x: headX, y: headY };
 
-  // Colisión
   if (
     headX < 0 ||
     headY < 0 ||
@@ -206,21 +206,20 @@ function draw() {
     snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)
   ) {
     if (gotStar) {
-      gameOverText.textContent = `🌟 ¡Ganaste 1 estrella! Toma captura para reclamar (Puntaje: ${score})`;
+      gameOverText.textContent = `🌟 ¡Ganaste 1 estrella!toma captura para reclamar(Puntaje: ${score})`;
     } else {
       gameOverText.textContent = `💔 Fin del juego... ¡Tu amor creció ${score} veces!`;
     }
     gameOverBox.classList.remove("hidden");
-    return false; // detener juego
+    return;
   }
 
   snake.unshift(newHead);
-  return true;
 }
 
-// 🚀 OPTIMIZACIÓN CON requestAnimationFrame
+// 🎮 Loop optimizado
 let lastRenderTime = 0;
-const gameSpeed = 8; // controla fluidez
+const gameSpeed = 10; // FPS aprox
 
 function gameLoop(currentTime) {
   const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
@@ -229,10 +228,8 @@ function gameLoop(currentTime) {
     return;
   }
   lastRenderTime = currentTime;
-
-  if (draw()) {
-    requestAnimationFrame(gameLoop);
-  }
+  draw();
+  requestAnimationFrame(gameLoop);
 }
 
 // 🚀 Iniciar al cargar
