@@ -173,3 +173,97 @@ header h1 {
   font-size: 0.95rem;
   color: #555;
 }
+/* 🎮 Estilos para la página de jueguitos */
+.games-page {
+  background: linear-gradient(to bottom right, #ffe6f0, #f0f8ff);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.games-header {
+  text-align: center;
+  margin-top: 40px;
+  color: #cc3366;
+}
+
+.games-header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.games-header p {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: center;
+  margin-top: 0;
+}
+
+/* 📦 Contenedor de los juegos */
+.games-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.game-card {
+  background: #ffffffcc;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  text-align: center;
+  width: 280px;
+}
+
+.game-card h2 {
+  color: #cc3366;
+}
+
+.game-card p {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.game-card button {
+  background-color: #ffb6c1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.game-card button:hover {
+  background-color: #4a90e2;
+}
+
+/* 🔒 Juegos bloqueados */
+.locked {
+  opacity: 0.6;
+}
+
+/* ⬅️ Botón volver */
+.back-btn {
+  margin: 2rem;
+  padding: 10px 20px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #cc3366;
+}
+
