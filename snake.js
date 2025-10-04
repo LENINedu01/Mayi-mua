@@ -1,234 +1,198 @@
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("snake");
 const ctx = canvas.getContext("2d");
 
 const box = 20;
-const canvasSize = 400;
-const boxes = canvasSize / box;
+let snake = [];
+snake[0] = { x: 9 * box, y: 10 * box };
 
-let snake, direction, score, heart, star, gotStar, game;
-const gameOverBox = document.getElementById("gameOverBox");
-const gameOverText = document.getElementById("gameOverText");
-const retryBtn = document.getElementById("retryBtn");
+let direction = null;
+let food = randomFood();
+let star = null;
+let score = 0;
+let game;
+let gameRunning = true;
 
-// 🧠 Inicializa el juego
-function initGame() {
-  snake = [{ x: 9 * box, y: 10 * box }];
-  direction = "RIGHT";
-  score = 0;
-  gotStar = false;
-  heart = {
-    x: Math.floor(Math.random() * boxes) * box,
-    y: Math.floor(Math.random() * boxes) * box
+// 🔒 Bloquear scroll al iniciar el juego
+document.body.classList.remove("unlocked");
+
+// Dibujar corazones y estrella
+function drawHeart(x, y) {
+  ctx.fillStyle = "#ff4d6d";
+  ctx.beginPath();
+  ctx.moveTo(x + box / 2, y + box / 4);
+  ctx.bezierCurveTo(x + box / 2, y, x + box, y, x + box, y + box / 4);
+  ctx.bezierCurveTo(x + box, y + box / 2, x + box / 2, y + box, x + box / 2, y + box);
+  ctx.bezierCurveTo(x + box / 2, y + box, x, y + box / 2, x, y + box / 4);
+  ctx.bezierCurveTo(x, y, x + box / 2, y, x + box / 2, y + box / 4);
+  ctx.fill();
+}
+
+function drawStar(x, y) {
+  ctx.fillStyle = "#ffd700";
+  ctx.beginPath();
+  const outerRadius = box / 2;
+  const innerRadius = box / 4;
+  const cx = x + box / 2;
+  const cy = y + box / 2;
+  for (let i = 0; i < 10; i++) {
+    const angle = (i * Math.PI) / 5;
+    const r = i % 2 === 0 ? outerRadius : innerRadius;
+    const px = cx + r * Math.cos(angle);
+    const py = cy + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function randomFood() {
+  return {
+    x: Math.floor(Math.random() * 19 + 1) * box,
+    y: Math.floor(Math.random() * 19 + 1) * box,
   };
-  star = null;
-  document.getElementById("score").innerText = score;
-  gameOverBox.classList.add("hidden");
-  clearInterval(game);
-
-  // 🚫 Bloquea scroll durante el juego
-  document.body.classList.add("no-scroll");
-
-  game = setInterval(draw, 150);
 }
 
 document.addEventListener("keydown", directionHandler);
-canvas.addEventListener("touchstart", handleTouchStart, false);
-canvas.addEventListener("touchmove", handleTouchMove, false);
-retryBtn.addEventListener("click", initGame);
+function directionHandler(event) {
+  if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+  else if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+  else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  else if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
 
-let xDown = null;
-let yDown = null;
-
-// 🎮 Control de dirección
-function directionHandler(e) {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-    e.preventDefault(); // evita que el navegador se desplace
-  }
-
-  if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-  if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-  if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-  if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+  // Evita que se mueva el scroll con las flechas
+  event.preventDefault();
 }
 
-// 📱 Control táctil
-function handleTouchStart(evt) {
-  const firstTouch = evt.touches[0];
-  xDown = firstTouch.clientX;
-  yDown = firstTouch.clientY;
-}
+function drawSnakePart(x, y, isHead = false) {
+  if (isHead) {
+    ctx.fillStyle = "#cc3366";
+    ctx.beginPath();
+    ctx.moveTo(x + box / 2, y);
+    ctx.lineTo(x + box, y + box);
+    ctx.lineTo(x, y + box);
+    ctx.closePath();
+    ctx.fill();
 
-function handleTouchMove(evt) {
-  if (!xDown || !yDown) return;
-
-  let xUp = evt.touches[0].clientX;
-  let yUp = evt.touches[0].clientY;
-  let xDiff = xDown - xUp;
-  let yDiff = yDown - yUp;
-
-  if (Math.abs(xDiff) > Math.abs(yDiff)) {
-    if (xDiff > 0 && direction !== "RIGHT") direction = "LEFT";
-    else if (xDiff < 0 && direction !== "LEFT") direction = "RIGHT";
+    // Ojitos 🐍
+    ctx.fillStyle = "#000";
+    if (direction === "RIGHT") {
+      ctx.fillRect(x + box * 0.7, y + box * 0.2, 2, 2);
+      ctx.fillRect(x + box * 0.7, y + box * 0.6, 2, 2);
+    } else if (direction === "LEFT") {
+      ctx.fillRect(x + box * 0.2, y + box * 0.2, 2, 2);
+      ctx.fillRect(x + box * 0.2, y + box * 0.6, 2, 2);
+    } else if (direction === "UP") {
+      ctx.fillRect(x + box * 0.3, y + box * 0.2, 2, 2);
+      ctx.fillRect(x + box * 0.7, y + box * 0.2, 2, 2);
+    } else if (direction === "DOWN") {
+      ctx.fillRect(x + box * 0.3, y + box * 0.7, 2, 2);
+      ctx.fillRect(x + box * 0.7, y + box * 0.7, 2, 2);
+    }
   } else {
-    if (yDiff > 0 && direction !== "DOWN") direction = "UP";
-    else if (yDiff < 0 && direction !== "UP") direction = "DOWN";
+    ctx.fillStyle = "#ffb6c1";
+    ctx.fillRect(x, y, box, box);
   }
-
-  xDown = null;
-  yDown = null;
 }
 
-// 💖 Dibuja el corazón
-function drawHeart(x, y) {
-  ctx.font = `${box * 0.9}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("💖", x + box / 2, y + box / 2);
+function collision(head, arr) {
+  for (let i = 0; i < arr.length; i++) {
+    if (head.x === arr[i].x && head.y === arr[i].y) return true;
+  }
+  return false;
 }
 
-// 🌟 Dibuja la estrella
-function drawStar(x, y) {
-  ctx.font = `${box * 0.9}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("⭐", x + box / 2, y + box / 2);
+function endGame() {
+  clearInterval(game);
+  gameRunning = false;
+
+  // 🔓 Desbloquear el scroll cuando termina el juego
+  document.body.classList.add("unlocked");
+
+  const retryBtn = document.createElement("button");
+  retryBtn.textContent = "Volver a intentar";
+  retryBtn.classList.add("retry-btn");
+  document.body.appendChild(retryBtn);
+
+  retryBtn.addEventListener("click", () => {
+    document.body.removeChild(retryBtn);
+    resetGame();
+    // 🔒 Bloquear scroll otra vez al reiniciar
+    document.body.classList.remove("unlocked");
+  });
 }
 
-// 🐍 Dibuja todo el juego
+function resetGame() {
+  snake = [{ x: 9 * box, y: 10 * box }];
+  direction = null;
+  food = randomFood();
+  star = null;
+  score = 0;
+  gameRunning = true;
+  game = setInterval(draw, 100);
+}
+
 function draw() {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 🩸 Borde vino
-  ctx.strokeStyle = "#8b1a3a";
-  ctx.lineWidth = 4;
+  // 🔲 Borde notorio color vino
+  ctx.strokeStyle = "#8B0000";
+  ctx.lineWidth = 6;
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-  // 🐍 Dibuja la serpiente
   for (let i = 0; i < snake.length; i++) {
-    const x = snake[i].x;
-    const y = snake[i].y;
-
-    if (i === 0) {
-      // Cabeza tipo lanza
-      ctx.fillStyle = "#ff4d88";
-      ctx.beginPath();
-      if (direction === "RIGHT") {
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + box, y + box / 2);
-        ctx.lineTo(x, y + box);
-      } else if (direction === "LEFT") {
-        ctx.moveTo(x + box, y);
-        ctx.lineTo(x, y + box / 2);
-        ctx.lineTo(x + box, y + box);
-      } else if (direction === "UP") {
-        ctx.moveTo(x, y + box);
-        ctx.lineTo(x + box / 2, y);
-        ctx.lineTo(x + box, y + box);
-      } else if (direction === "DOWN") {
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + box / 2, y + box);
-        ctx.lineTo(x + box, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      // 👀 Ojitos
-      ctx.fillStyle = "#000";
-      if (direction === "RIGHT" || direction === "LEFT") {
-        ctx.beginPath();
-        ctx.arc(x + (direction === "RIGHT" ? box - 6 : 6), y + 5, 2, 0, Math.PI * 2);
-        ctx.arc(x + (direction === "RIGHT" ? box - 6 : 6), y + box - 5, 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.arc(x + 5, y + (direction === "DOWN" ? box - 6 : 6), 2, 0, Math.PI * 2);
-        ctx.arc(x + box - 5, y + (direction === "DOWN" ? box - 6 : 6), 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    } else {
-      // Cuerpo con gradiente suave
-      const grad = ctx.createRadialGradient(
-        x + box / 2,
-        y + box / 2,
-        5,
-        x + box / 2,
-        y + box / 2,
-        box / 1.2
-      );
-      grad.addColorStop(0, "#ffd6e8");
-      grad.addColorStop(1, "#ffb6c1");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.roundRect(x, y, box, box, 6);
-      ctx.fill();
-    }
+    drawSnakePart(snake[i].x, snake[i].y, i === 0);
   }
 
-  // ❤️ Corazón
-  drawHeart(heart.x, heart.y);
-
-  // 🌟 Estrella si existe
+  drawHeart(food.x, food.y);
   if (star) drawStar(star.x, star.y);
 
-  // Movimiento
-  let headX = snake[0].x;
-  let headY = snake[0].y;
+  let snakeX = snake[0].x;
+  let snakeY = snake[0].y;
 
-  if (direction === "LEFT") headX -= box;
-  if (direction === "UP") headY -= box;
-  if (direction === "RIGHT") headX += box;
-  if (direction === "DOWN") headY += box;
+  if (direction === "LEFT") snakeX -= box;
+  if (direction === "UP") snakeY -= box;
+  if (direction === "RIGHT") snakeX += box;
+  if (direction === "DOWN") snakeY += box;
 
-  // Comer corazón
-  if (headX === heart.x && headY === heart.y) {
+  if (snakeX === food.x && snakeY === food.y) {
     score++;
-    document.getElementById("score").innerText = score;
-    heart = {
-      x: Math.floor(Math.random() * boxes) * box,
-      y: Math.floor(Math.random() * boxes) * box
-    };
+    food = randomFood();
 
-    // 🌟 Aparece estrella al llegar a 20
     if (score === 20 && !star) {
-      star = {
-        x: Math.floor(Math.random() * boxes) * box,
-        y: Math.floor(Math.random() * boxes) * box
-      };
+      star = randomFood();
     }
-  } else if (star && headX === star.x && headY === star.y) {
-    gotStar = true;
+  } else if (star && snakeX === star.x && snakeY === star.y) {
+    score += 5;
     star = null;
+    clearInterval(game);
+    alert("🌟 ¡Ganaste 1 estrella!");
+    endGame();
+    return;
   } else {
     snake.pop();
   }
 
-  const newHead = { x: headX, y: headY };
+  const newHead = { x: snakeX, y: snakeY };
 
-  // 💥 Colisión
   if (
-    headX < 0 ||
-    headY < 0 ||
-    headX >= canvasSize ||
-    headY >= canvasSize ||
-    snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)
+    snakeX < 0 ||
+    snakeY < 0 ||
+    snakeX >= canvas.width ||
+    snakeY >= canvas.height ||
+    collision(newHead, snake)
   ) {
-    clearInterval(game);
-
-    // ✅ Desbloquea scroll al terminar
-    document.body.classList.remove("no-scroll");
-
-    if (gotStar) {
-      gameOverText.textContent = `🌟 ¡Ganaste 1 estrella!reclam con captura (Puntaje: ${score})`;
-    } else {
-      gameOverText.textContent = `💔 Fin del juego... ¡Tu amor creció ${score} veces!`;
-    }
-    gameOverBox.classList.remove("hidden");
+    endGame();
     return;
   }
 
   snake.unshift(newHead);
+
+  ctx.fillStyle = "#333";
+  ctx.font = "18px Arial";
+  ctx.fillText("💖 " + score, box, box);
 }
 
-// 🚀 Inicia el juego
-initGame();
+game = setInterval(draw, 100);
+
