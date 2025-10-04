@@ -5,7 +5,7 @@ const box = 20;
 const canvasSize = 400;
 const boxes = canvasSize / box;
 
-let snake, direction, score, heart, star, gotStar;
+let snake, direction, score, heart, star, game;
 const gameOverBox = document.getElementById("gameOverBox");
 const gameOverText = document.getElementById("gameOverText");
 const retryBtn = document.getElementById("retryBtn");
@@ -14,37 +14,36 @@ function initGame() {
   snake = [{ x: 9 * box, y: 10 * box }];
   direction = "RIGHT";
   score = 0;
-  gotStar = false;
-  heart = {
-    x: Math.floor(Math.random() * boxes) * box,
-    y: Math.floor(Math.random() * boxes) * box
-  };
   star = null;
+  heart = randomPosition();
   document.getElementById("score").innerText = score;
   gameOverBox.classList.add("hidden");
-  lastRenderTime = 0;
-  requestAnimationFrame(gameLoop);
+
+  // 🚫 Bloquea scroll mientras se juega
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
+
+  clearInterval(game);
+  game = setInterval(draw, 120);
 }
 
-// 🧭 Dirección por teclado
-document.addEventListener("keydown", directionHandler);
+function randomPosition() {
+  return {
+    x: Math.floor(Math.random() * boxes) * box,
+    y: Math.floor(Math.random() * boxes) * box,
+  };
+}
 
-// 🚫 Evitar que las flechas muevan la página
-window.addEventListener("keydown", e => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
-    e.preventDefault();
-  }
-});
+document.addEventListener("keydown", directionHandler);
+canvas.addEventListener("touchstart", handleTouchStart, false);
+canvas.addEventListener("touchmove", handleTouchMove, false);
+retryBtn.addEventListener("click", initGame);
 
 let xDown = null;
 let yDown = null;
 
-// 🖐️ Controles táctiles
-canvas.addEventListener("touchstart", handleTouchStart, false);
-canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-retryBtn.addEventListener("click", initGame);
-
 function directionHandler(e) {
+  e.preventDefault();
   if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
   if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
   if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
@@ -58,13 +57,12 @@ function handleTouchStart(evt) {
 }
 
 function handleTouchMove(evt) {
-  evt.preventDefault();
   if (!xDown || !yDown) return;
 
-  const xUp = evt.touches[0].clientX;
-  const yUp = evt.touches[0].clientY;
-  const xDiff = xDown - xUp;
-  const yDiff = yDown - yUp;
+  let xUp = evt.touches[0].clientX;
+  let yUp = evt.touches[0].clientY;
+  let xDiff = xDown - xUp;
+  let yDiff = yDown - yUp;
 
   if (Math.abs(xDiff) > Math.abs(yDiff)) {
     if (xDiff > 0 && direction !== "RIGHT") direction = "LEFT";
@@ -78,94 +76,60 @@ function handleTouchMove(evt) {
   yDown = null;
 }
 
-// 💖 Dibuja el corazón
 function drawHeart(x, y) {
-  ctx.font = `${box * 0.9}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("💖", x + box / 2, y + box / 2);
+  ctx.font = "20px Arial";
+  ctx.fillText("💖", x, y + 15);
 }
 
-// 🌟 Dibuja la estrella
 function drawStar(x, y) {
-  ctx.font = `${box * 0.9}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("⭐", x + box / 2, y + box / 2);
+  ctx.font = "20px Arial";
+  ctx.fillText("⭐", x + 3, y + 15);
 }
 
-// 🕹️ Dibuja todo
 function draw() {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 🩸 Borde vino
   ctx.strokeStyle = "#8b1a3a";
   ctx.lineWidth = 4;
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-  // 🐍 Serpiente
   for (let i = 0; i < snake.length; i++) {
     const x = snake[i].x;
     const y = snake[i].y;
-
+    const grad = ctx.createRadialGradient(
+      x + box / 2,
+      y + box / 2,
+      5,
+      x + box / 2,
+      y + box / 2,
+      box / 1.2
+    );
     if (i === 0) {
-      // Cabeza con forma de lanza
-      ctx.fillStyle = "#ff4d88";
-      ctx.beginPath();
-      if (direction === "RIGHT") {
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + box, y + box / 2);
-        ctx.lineTo(x, y + box);
-      } else if (direction === "LEFT") {
-        ctx.moveTo(x + box, y);
-        ctx.lineTo(x, y + box / 2);
-        ctx.lineTo(x + box, y + box);
-      } else if (direction === "UP") {
-        ctx.moveTo(x, y + box);
-        ctx.lineTo(x + box / 2, y);
-        ctx.lineTo(x + box, y + box);
-      } else if (direction === "DOWN") {
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + box / 2, y + box);
-        ctx.lineTo(x + box, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      // Ojitos
-      ctx.fillStyle = "#000";
-      if (direction === "RIGHT" || direction === "LEFT") {
-        ctx.beginPath();
-        ctx.arc(x + (direction === "RIGHT" ? box - 6 : 6), y + 5, 2, 0, Math.PI * 2);
-        ctx.arc(x + (direction === "RIGHT" ? box - 6 : 6), y + box - 5, 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.arc(x + 5, y + (direction === "DOWN" ? box - 6 : 6), 2, 0, Math.PI * 2);
-        ctx.arc(x + box - 5, y + (direction === "DOWN" ? box - 6 : 6), 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      grad.addColorStop(0, "#ff4d88");
+      grad.addColorStop(1, "#cc3366");
     } else {
-      // Cuerpo
-      const grad = ctx.createRadialGradient(x + box / 2, y + box / 2, 5, x + box / 2, y + box / 2, box / 1.2);
       grad.addColorStop(0, "#ffd6e8");
       grad.addColorStop(1, "#ffb6c1");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.roundRect(x, y, box, box, 6);
-      ctx.fill();
     }
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x, y, box, box, 6);
+    ctx.fill();
   }
 
-  drawHeart(heart.x, heart.y);
+  ctx.font = `${box * 0.9}px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("💖", heart.x + box / 2, heart.y + box / 2);
+
   if (star) drawStar(star.x, star.y);
 
-  moveSnake();
-}
+  ctx.fillStyle = "#cc3366";
+  ctx.font = "20px Arial";
+  ctx.fillText("Puntaje: " + score, box, 30);
 
-// 🧠 Movimiento y lógica
-function moveSnake() {
   let headX = snake[0].x;
   let headY = snake[0].y;
 
@@ -177,21 +141,19 @@ function moveSnake() {
   if (headX === heart.x && headY === heart.y) {
     score++;
     document.getElementById("score").innerText = score;
-    heart = {
-      x: Math.floor(Math.random() * boxes) * box,
-      y: Math.floor(Math.random() * boxes) * box
-    };
+    heart = randomPosition();
 
-    // 🌟 Aparece estrella al llegar a 20 corazones
-    if (score === 20 && !star) {
-      star = {
-        x: Math.floor(Math.random() * boxes) * box,
-        y: Math.floor(Math.random() * boxes) * box
-      };
-    }
+    if (score === 20 && !star) star = randomPosition();
   } else if (star && headX === star.x && headY === star.y) {
-    gotStar = true;
-    star = null;
+    score++;
+    clearInterval(game);
+    gameOverText.textContent = `🏆 ¡Ganaste 1 estrella reclama tomando captura y con ${score} puntos!`;
+    gameOverBox.classList.remove("hidden");
+
+    // ✅ Reactiva scroll
+    document.body.style.overflow = "auto";
+    document.body.style.touchAction = "auto";
+    return;
   } else {
     snake.pop();
   }
@@ -203,34 +165,20 @@ function moveSnake() {
     headY < 0 ||
     headX >= canvasSize ||
     headY >= canvasSize ||
-    snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)
+    snake.some((seg) => seg.x === newHead.x && seg.y === newHead.y)
   ) {
-    if (gotStar) {
-      gameOverText.textContent = `🌟 ¡Ganaste 1 estrella!toma captura para reclamar(Puntaje: ${score})`;
-    } else {
-      gameOverText.textContent = `💔 Fin del juego... ¡Tu amor creció ${score} veces!`;
-    }
+    clearInterval(game);
+    gameOverText.textContent = `💔 Fin del juego... ¡Tu amor creció ${score} veces!`;
     gameOverBox.classList.remove("hidden");
+
+    // ✅ Reactiva scroll al perder
+    document.body.style.overflow = "auto";
+    document.body.style.touchAction = "auto";
     return;
   }
 
   snake.unshift(newHead);
 }
 
-// 🎮 Loop optimizado
-let lastRenderTime = 0;
-const gameSpeed = 10; // FPS aprox
-
-function gameLoop(currentTime) {
-  const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
-  if (secondsSinceLastRender < 1 / gameSpeed) {
-    requestAnimationFrame(gameLoop);
-    return;
-  }
-  lastRenderTime = currentTime;
-  draw();
-  requestAnimationFrame(gameLoop);
-}
-
-// 🚀 Iniciar al cargar
+// Iniciar al cargar
 initGame();
